@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="mk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Код Академија | Портал за лекции</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Мобилно мени - позадина -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Странична лента -->
+    <aside class="sidebar" id="sidebar">
+      <div class="logo-area">
+        <a href="#" class="logo">
+          <span class="logo-icon">&lt;/&gt;</span>
+          <span data-i18n="logo">Код Академија</span>
+        </a>
+        <button
+          class="close-menu-btn"
+          id="closeMenuBtn"
+          data-i18n-aria="closeMenu"
+          aria-label="Затвори мени"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="student-box">
+        <div class="student-avatar">Ö</div>
+        <div>
+          <p class="student-name" id="studentName">Се вчитува...</p>
+          <p class="student-status" id="studentGroup">Ученик</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <p class="nav-label" data-i18n="menuLabel">МЕНИ</p>
+        <a href="#dashboard" class="nav-link active" data-page="dashboard">
+          <span>⌂</span>
+          <span data-i18n="home">Почетна</span>
+        </a>
+        <a href="#lessons" class="nav-link" data-page="lessons">
+          <span>▣</span>
+          <span data-i18n="lessons">Лекции</span>
+        </a>
+        <a href="#practice" class="nav-link" data-page="practice">
+          <span>⌘</span>
+          <span data-i18n="practice">Практични задачи</span>
+        </a>
+        <a href="#homework" class="nav-link" data-page="homework">
+          <span>✓</span>
+          <span data-i18n="homework">Домашни задачи</span>
+        </a>
+
+        <p class="nav-label second-label" data-i18n="coursesLabel">КУРСЕВИ</p>
+
+        <button class="course-nav-btn active-course" data-course="all">
+          <span class="course-dot all-dot"></span>
+          <span data-i18n="allCourses">Сите курсеви</span>
+        </button>
+        <button class="course-nav-btn" data-course="html-mk">
+          <span class="course-dot mk-dot"></span>
+          <span data-i18n="courseHtmlMk">HTML и CSS - Македонски</span>
+        </button>
+        <button class="course-nav-btn" data-course="html-tr">
+          <span class="course-dot tr-dot"></span>
+          <span data-i18n="courseHtmlTr">HTML и CSS - Турски</span>
+        </button>
+        <button class="course-nav-btn" data-course="javascript">
+          <span class="course-dot js-dot"></span>
+          JavaScript
+        </button>
+        <button class="course-nav-btn" data-course="react">
+          <span class="course-dot react-dot"></span>
+          React
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="logoutButton" class="logout-button" data-i18n="logout">
+          Одјава
+        </button>
+        <p data-i18n="footerCopyright">© 2026 Код Академија</p>
+        <p data-i18n="footerMotto">Успехот доаѓа со мали чекори.</p>
+      </div>
+    </aside>
+
+    <!-- Главна содржина -->
+    <main class="main-content">
+      <!-- Заглавие -->
+      <header class="topbar">
+        <button
+          class="mobile-menu-btn"
+          id="mobileMenuBtn"
+          aria-label="Отвори мени"
+        >
+          ☰
+        </button>
+
+        <div class="breadcrumb">
+          <span id="currentPageTitle">Почетна</span>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="theme-btn" id="themeBtn" aria-label="Промени тема">
+            ☾
+          </button>
+
+          <button class="notification-btn" aria-label="Известувања">
+            ♢
+            <span class="notification-dot"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Содржина на страницата -->
+      <div class="page-container">
+        <!-- HERO -->
+        <section class="welcome-section" id="dashboard">
+          <div class="welcome-text">
+            <p class="eyebrow" data-i18n="welcomeEyebrow">ПРОДОЛЖИ СО УЧЕЊЕ</p>
+            <h1>
+              <span data-i18n="welcomeTitle">Здраво, иден програмеру!</span>
+              <span>👋</span>
+            </h1>
+            <p data-i18n="welcomeText">
+              Повтори ги белешките од лекциите, заврши ги практичните задачи и
+              секој ден напредувај малку повеќе.
+            </p>
+          </div>
+
+          <div class="welcome-illustration">
+            <div class="code-window">
+              <div class="window-top">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <div class="mini-code">
+                <p><i class="purple">const</i> <i class="blue">success</i> =</p>
+                <p>&nbsp;&nbsp;<i class="yellow">"Продолжи да работиш!"</i>;</p>
+                <p><i class="purple">if</i> (success) {</p>
+                <p>&nbsp;&nbsp;<i class="green">learn</i>();</p>
+                <p>}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Статистики -->
+        <section class="stats-grid">
+          <article class="stat-card">
+            <div class="stat-icon purple-bg">▣</div>
+            <div>
+              <p class="stat-label" data-i18n="statTotal">Вкупно лекции</p>
+              <h3 id="totalLessonsStat">0</h3>
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon green-bg">✓</div>
+            <div>
+              <p class="stat-label" data-i18n="statCompleted">Завршени</p>
+              <h3 id="completedLessonsStat">0</h3>
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon orange-bg">⌘</div>
+            <div>
+              <p class="stat-label" data-i18n="statPractice">
+                Практични задачи
+              </p>
+              <h3 id="practiceStat">0</h3>
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-icon blue-bg">◷</div>
+            <div>
+              <p class="stat-label" data-i18n="statHomework">Задачи во тек</p>
+              <h3 id="homeworkStat">0</h3>
+            </div>
+          </article>
+        </section>
+
+        <section class="content-section" id="lessons">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow" data-i18n="lessonsEyebrow">
+                СОДРЖИНА НА ЛЕКЦИИТЕ
+              </p>
+              <h2 data-i18n="lessonsTitle">Последно додадени лекции</h2>
+            </div>
+            <button class="view-all-btn" id="viewAllLessonsBtn">
+              <span data-i18n="viewAll">Види ги сите лекции</span>
+              <span>→</span>
+            </button>
+          </div>
+
+          <div class="filter-bar">
+            <button
+              class="filter-btn active-filter"
+              data-filter="all"
+              data-i18n="filterAll"
+            >
+              Сите
+            </button>
+            <button
+              class="filter-btn"
+              data-filter="html-mk"
+              data-i18n="filterHtmlMk"
+            >
+              HTML/CSS МК
+            </button>
+            <button
+              class="filter-btn"
+              data-filter="html-tr"
+              data-i18n="filterHtmlTr"
+            >
+              HTML/CSS ТР
+            </button>
+            <button class="filter-btn" data-filter="javascript">
+              JavaScript
+            </button>
+            <button class="filter-btn" data-filter="react">React</button>
+          </div>
+
+          <div class="lesson-grid" id="lessonGrid"></div>
+        </section>
+
+        <section class="content-section practice-section" id="practice">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow" data-i18n="practiceEyebrow">
+                ВРЕМЕ ЗА ПИШУВАЊЕ КОД
+              </p>
+              <h2 data-i18n="practiceTitle">Практични задачи</h2>
+            </div>
+          </div>
+          <div class="practice-grid" id="practiceGrid"></div>
+        </section>
+
+        <section class="content-section homework-section" id="homework">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow" data-i18n="homeworkEyebrow">ЗА ПРЕДАВАЊЕ</p>
+              <h2 data-i18n="homeworkTitle">Домашни задачи</h2>
+            </div>
+          </div>
+          <div class="homework-list" id="homeworkList"></div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Модал за детали на лекцијата -->
+    <div class="modal-backdrop" id="lessonModal">
+      <div class="lesson-modal">
+        <button class="modal-close-btn" id="modalCloseBtn" aria-label="Затвори">
+          ✕
+        </button>
+
+        <div class="modal-content" id="modalContent">
+          <!-- Се пополнува преку JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Порака за известување -->
+    <div class="toast" id="toast"></div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

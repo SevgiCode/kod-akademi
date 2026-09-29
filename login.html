@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="mk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Код Академија | Најава</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="login.css" />
+  </head>
+  <body>
+    <main class="login-page">
+      <section class="login-card">
+        <div class="login-logo">
+          <span class="logo-icon">&lt;/&gt;</span>
+          <span>Код Академија</span>
+        </div>
+
+        <div class="login-heading">
+          <p>ПОРТАЛ ЗА УЧЕНИЦИ</p>
+          <h1>Добредојде повторно!</h1>
+          <span>Најави се за да пристапиш до лекциите.</span>
+        </div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="email">Е-пошта</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="primer@mail.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Лозинка</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="Внеси ја твојата лозинка"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button type="submit" id="loginButton">Најави се</button>
+
+          <p class="login-error" id="loginError"></p>
+        </form>
+
+        <p class="help-text">
+          Ако немаш сметка или си ја заборавил лозинката, контактирај го твојот
+          професор.
+        </p>
+      </section>
+    </main>
+
+    <script type="module" src="login.js"></script>
+  </body>
+</html>
