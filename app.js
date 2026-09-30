@@ -11,9 +11,11 @@ import {
   getDoc,
   collection,
   getDocs,
-  query,
-  orderBy,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+/* --------------------------------------------------
+   AYARLAR
+-------------------------------------------------- */
 
 const allCourses = [
   "html-mk",
@@ -21,6 +23,10 @@ const allCourses = [
   "javascript",
   "react",
 ];
+
+// Firestore'daki ödev alt koleksiyonunun adı.
+// Firestore'da: courses/react/homework/homework-001
+const HOMEWORK_COLLECTION = "homework";
 
 let currentUserData = null;
 
@@ -31,6 +37,10 @@ let currentFilter = "all";
 
 let t = translations.mk;
 let currentLang = "mk";
+
+/* --------------------------------------------------
+   HTML ELEMENTLERİ
+-------------------------------------------------- */
 
 const lessonGrid = document.getElementById("lessonGrid");
 const homeworkList = document.getElementById("homeworkList");
@@ -55,12 +65,13 @@ function detectLanguage(userData) {
 }
 
 function applyLanguage() {
-  document.title = t.pageTitle;
+  document.documentElement.lang = currentLang;
+  document.title = t.pageTitle || "Kod Akademi";
 
   const logoText = document.querySelector(".logo span:last-child");
 
   if (logoText) {
-    logoText.textContent = t.logo;
+    logoText.textContent = t.logo || "Kod Akademi";
   }
 
   setTextForAll('[data-i18n="menuLabel"]', t.menuLabel);
@@ -111,27 +122,29 @@ function applyLanguage() {
     const activeNav = document.querySelector(".nav-link.active");
 
     if (activeNav?.dataset.page === "dashboard") {
-      currentPageTitle.textContent = t.home;
+      currentPageTitle.textContent = t.home || "";
     }
   }
 }
 
 function setTextForAll(selector, text) {
   document.querySelectorAll(selector).forEach((element) => {
-    element.textContent = text || "";
+    if (text) {
+      element.textContent = text;
+    }
   });
 }
 
 function setTextForOne(selector, text) {
   const element = document.querySelector(selector);
 
-  if (element) {
-    element.textContent = text || "";
+  if (element && text) {
+    element.textContent = text;
   }
 }
 
 /* --------------------------------------------------
-   AUTHENTICATION VE KULLANICI YÜKLEME
+   AUTHENTICATION VE KULLANICI PROFİLİ
 -------------------------------------------------- */
 
 onAuthStateChanged(auth, async (user) => {
@@ -145,7 +158,10 @@ onAuthStateChanged(auth, async (user) => {
     const userSnapshot = await getDoc(userReference);
 
     if (!userSnapshot.exists()) {
-      alert(translations.mk.alertNoProfile || "Kullanıcı profili bulunamadı.");
+      alert(
+        translations.mk.alertNoProfile ||
+          "Kullanıcı profiliniz bulunamadı.",
+      );
 
       await signOut(auth);
       window.location.href = "./login.html";
@@ -155,7 +171,10 @@ onAuthStateChanged(auth, async (user) => {
     currentUserData = userSnapshot.data();
 
     if (currentUserData.active !== true) {
-      alert(translations.mk.alertInactive || "Hesabınız aktif değil.");
+      alert(
+        translations.mk.alertInactive ||
+          "Hesabınız aktif değil.",
+      );
 
       await signOut(auth);
       window.location.href = "./login.html";
@@ -168,21 +187,26 @@ onAuthStateChanged(auth, async (user) => {
     applyLanguage();
 
     if (studentName) {
-      studentName.textContent = currentUserData.fullName || user.email;
+      studentName.textContent =
+        currentUserData.fullName ||
+        currentUserData.username ||
+        user.email ||
+        "";
     }
 
     if (currentUserData.role === "teacher") {
+      currentFilter = "all";
+
       if (studentGroup) {
         studentGroup.textContent = t.teacher || "Teacher";
       }
-
-      currentFilter = "all";
     } else {
-      if (studentGroup) {
-        studentGroup.textContent = getCourseName(currentUserData.group);
-      }
-
       currentFilter = currentUserData.group;
+
+      if (studentGroup) {
+        studentGroup.textContent =
+          getCourseName(currentUserData.group);
+      }
     }
 
     configureCourseButtons();
@@ -190,28 +214,17 @@ onAuthStateChanged(auth, async (user) => {
 
     await loadAllowedContent();
   } catch (error) {
-    console.error("Yükleme hatası:", error);
+    console.error("İçerik yükleme hatası:", error);
 
-    if (lessonGrid) {
-      lessonGrid.innerHTML = `
-        <div class="empty-message">
-          ${escapeHtml(t.loadError || "İçerikler yüklenirken hata oluştu.")}
-        </div>
-      `;
-    }
-
-    if (homeworkList) {
-      homeworkList.innerHTML = `
-        <div class="empty-message">
-          ${escapeHtml(t.loadError || "İçerikler yüklenirken hata oluştu.")}
-        </div>
-      `;
-    }
+    showLoadError(
+      t.loadError ||
+        "İçerikler yüklenirken hata oluştu. Lütfen sayfayı yenileyin.",
+    );
   }
 });
 
 /* --------------------------------------------------
-   KURS İSİMLERİ
+   KURS ADLARI
 -------------------------------------------------- */
 
 function getCourseName(courseId) {
@@ -224,15 +237,11 @@ function getCourseName(courseId) {
 
   const translationKey = courseKeyMap[courseId];
 
-  if (translationKey && t[translationKey]) {
-    return t[translationKey];
-  }
-
-  return courseId;
+  return t[translationKey] || courseId;
 }
 
 /* --------------------------------------------------
-   KURS FİLTRELERİ
+   FİLTRELER
 -------------------------------------------------- */
 
 function configureCourseButtons() {
@@ -253,17 +262,17 @@ function configureCourseButtons() {
   }
 
   courseButtons.forEach((button) => {
-    const isAllowedCourse =
+    const canSeeThisCourse =
       button.dataset.course === currentUserData.group;
 
-    button.style.display = isAllowedCourse ? "flex" : "none";
+    button.style.display = canSeeThisCourse ? "flex" : "none";
   });
 
   filterButtons.forEach((button) => {
-    const isAllowedCourse =
+    const canSeeThisCourse =
       button.dataset.filter === currentUserData.group;
 
-    button.style.display = isAllowedCourse ? "inline-flex" : "none";
+    button.style.display = canSeeThisCourse ? "inline-flex" : "none";
   });
 
   updateActiveFilterButtons();
@@ -294,10 +303,9 @@ function addCourseFilterEvents() {
 }
 
 function setCourseFilter(filter) {
-  if (
-    currentUserData.role !== "teacher" &&
-    filter !== currentUserData.group
-  ) {
+  const isStudent = currentUserData.role !== "teacher";
+
+  if (isStudent && filter !== currentUserData.group) {
     return;
   }
 
@@ -306,15 +314,6 @@ function setCourseFilter(filter) {
   updateActiveFilterButtons();
   renderFilteredLessons();
   renderFilteredHomeworks();
-
-  const lessonsSection = document.getElementById("lessons");
-
-  if (lessonsSection) {
-    lessonsSection.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }
 }
 
 function updateActiveFilterButtons() {
@@ -334,10 +333,136 @@ function updateActiveFilterButtons() {
 }
 
 /* --------------------------------------------------
-   FIRESTORE'DAN DERSLER VE ÖDEVLERİ YÜKLE
+   FIRESTORE: DERSLER VE EV ÖDEVLERİ
 -------------------------------------------------- */
 
 async function loadAllowedContent() {
+  showLoadingMessages();
+
+  const allowedCourses =
+    currentUserData.role === "teacher"
+      ? allCourses
+      : [currentUserData.group];
+
+  loadedLessons = [];
+  loadedHomeworks = [];
+
+  const courseResults = await Promise.all(
+    allowedCourses.map(async (courseId) => {
+      const lessonsReference = collection(
+        db,
+        "courses",
+        courseId,
+        "lessons",
+      );
+
+      const homeworkReference = collection(
+        db,
+        "courses",
+        courseId,
+        HOMEWORK_COLLECTION,
+      );
+
+      const [lessonsResult, homeworksResult] =
+        await Promise.allSettled([
+          getDocs(lessonsReference),
+          getDocs(homeworkReference),
+        ]);
+
+      if (lessonsResult.status === "rejected") {
+        console.error(
+          `Dersler yüklenemedi (${courseId}):`,
+          lessonsResult.reason,
+        );
+      }
+
+      if (homeworksResult.status === "rejected") {
+        console.error(
+          `Ödevler yüklenemedi (${courseId}/${HOMEWORK_COLLECTION}):`,
+          homeworksResult.reason,
+        );
+      }
+
+      return {
+        courseId,
+        lessonsSnapshot:
+          lessonsResult.status === "fulfilled"
+            ? lessonsResult.value
+            : null,
+        homeworksSnapshot:
+          homeworksResult.status === "fulfilled"
+            ? homeworksResult.value
+            : null,
+      };
+    }),
+  );
+
+  courseResults.forEach((courseResult) => {
+    const {
+      courseId,
+      lessonsSnapshot,
+      homeworksSnapshot,
+    } = courseResult;
+
+    if (lessonsSnapshot) {
+      lessonsSnapshot.forEach((lessonDocument) => {
+        const lessonData = lessonDocument.data();
+
+        if (lessonData.published === true) {
+          loadedLessons.push({
+            id: lessonDocument.id,
+            course: courseId,
+            courseName: getCourseName(courseId),
+            ...lessonData,
+          });
+        }
+      });
+    }
+
+    if (homeworksSnapshot) {
+      console.log(
+        `Kurs: ${courseId} | Bulunan ödev sayısı: ${homeworksSnapshot.size}`,
+      );
+
+      homeworksSnapshot.forEach((homeworkDocument) => {
+        const homeworkData = homeworkDocument.data();
+
+        console.log(
+          `Ödev bulundu: ${homeworkDocument.id}`,
+          homeworkData,
+        );
+
+        if (homeworkData.published === true) {
+          loadedHomeworks.push({
+            id: homeworkDocument.id,
+            course: courseId,
+            courseName: getCourseName(courseId),
+            ...homeworkData,
+          });
+        }
+      });
+    }
+  });
+
+  // "order" alanı eksik olan içerikler de görünür.
+  loadedLessons.sort(sortByOrder);
+  loadedHomeworks.sort(sortByOrder);
+
+  renderFilteredLessons();
+  renderFilteredHomeworks();
+
+  updateTotalLessons(loadedLessons.length);
+  updateHomeworkStat(loadedHomeworks.length);
+}
+
+function sortByOrder(firstItem, secondItem) {
+  const firstOrder = Number(firstItem.order ?? 999999);
+  const secondOrder = Number(secondItem.order ?? 999999);
+
+  return firstOrder - secondOrder;
+}
+
+function showLoadingMessages() {
   if (lessonGrid) {
     lessonGrid.innerHTML = `
       <div class="empty-message">
@@ -353,81 +478,26 @@ async function loadAllowedContent() {
       </div>
     `;
   }
+}
 
-  const allowedCourses =
-    currentUserData.role === "teacher"
-      ? allCourses
-      : [currentUserData.group];
+function showLoadError(message) {
+  const errorHtml = `
+    <div class="empty-message">
+      ${escapeHtml(message)}
+    </div>
+  `;
 
-  loadedLessons = [];
-  loadedHomeworks = [];
-
-  for (const courseId of allowedCourses) {
-    const lessonsReference = collection(
-      db,
-      "courses",
-      courseId,
-      "lessons",
-    );
-
-    const homeworkReference = collection(
-      db,
-      "courses",
-      courseId,
-      "homework",
-    );
-
-    const lessonsQuery = query(
-      lessonsReference,
-      orderBy("order", "asc"),
-    );
-
-    const homeworkQuery = query(
-      homeworkReference,
-      orderBy("order", "asc"),
-    );
-
-    const [lessonsSnapshot, homeworkSnapshot] = await Promise.all([
-      getDocs(lessonsQuery),
-      getDocs(homeworkQuery),
-    ]);
-
-    lessonsSnapshot.forEach((lessonDocument) => {
-      const lessonData = lessonDocument.data();
-
-      if (lessonData.published === true) {
-        loadedLessons.push({
-          id: lessonDocument.id,
-          course: courseId,
-          courseName: getCourseName(courseId),
-          ...lessonData,
-        });
-      }
-    });
-
-    homeworkSnapshot.forEach((homeworkDocument) => {
-      const homeworkData = homeworkDocument.data();
-
-      if (homeworkData.published === true) {
-        loadedHomeworks.push({
-          id: homeworkDocument.id,
-          course: courseId,
-          courseName: getCourseName(courseId),
-          ...homeworkData,
-        });
-      }
-    });
+  if (lessonGrid) {
+    lessonGrid.innerHTML = errorHtml;
   }
 
-  renderFilteredLessons();
-  renderFilteredHomeworks();
-
-  updateTotalLessons(loadedLessons.length);
-  updateHomeworkStat(loadedHomeworks.length);
+  if (homeworkList) {
+    homeworkList.innerHTML = errorHtml;
+  }
 }
 
 /* --------------------------------------------------
-   DERSLERİ GÖSTER
+   DERS LİSTESİ
 -------------------------------------------------- */
 
 function renderFilteredLessons() {
@@ -446,316 +516,4 @@ function renderLessons(lessons) {
     return;
   }
 
-  if (!lessons.length) {
-    lessonGrid.innerHTML = `
-      <div class="empty-message">
-        ${escapeHtml(t.noLessonsInGroup || "Bu kurs için henüz ders yok.")}
-      </div>
-    `;
-    return;
-  }
-
-  lessonGrid.innerHTML = lessons
-    .map((lesson) => {
-      return `
-        <article class="lesson-card">
-          <div class="lesson-card-top ${escapeHtml(lesson.course)}"></div>
-
-          <div class="lesson-card-body">
-            <div class="lesson-card-meta">
-              <span class="course-badge badge-${escapeHtml(lesson.course)}">
-                ${escapeHtml(lesson.courseName)}
-              </span>
-
-              <span class="lesson-date">
-                ${escapeHtml(lesson.date || "")}
-              </span>
-            </div>
-
-            <h3>${escapeHtml(lesson.title || "")}</h3>
-
-            <p class="lesson-card-description">
-              ${escapeHtml(lesson.description || "")}
-            </p>
-
-            <div class="lesson-card-footer">
-              <span class="lesson-info">
-                ◷ ${escapeHtml(lesson.duration || "")}
-              </span>
-
-              <button
-                class="open-lesson-btn"
-                type="button"
-                data-course-id="${escapeHtml(lesson.course)}"
-                data-lesson-id="${escapeHtml(lesson.id)}"
-              >
-                ${escapeHtml(t.openLesson || "Dersi aç")} →
-              </button>
-            </div>
-          </div>
-        </article>
-      `;
-    })
-    .join("");
-
-  document.querySelectorAll(".open-lesson-btn").forEach((button) => {
-    button.addEventListener("click", () => {
-      const lesson = loadedLessons.find((item) => {
-        return (
-          item.course === button.dataset.courseId &&
-          item.id === button.dataset.lessonId
-        );
-      });
-
-      if (lesson) {
-        openLessonModal(lesson);
-      }
-    });
-  });
-}
-
-/* --------------------------------------------------
-   EV ÖDEVLERİNİ GÖSTER
--------------------------------------------------- */
-
-function renderFilteredHomeworks() {
-  const filteredHomeworks =
-    currentFilter === "all"
-      ? loadedHomeworks
-      : loadedHomeworks.filter((homework) => {
-          return homework.course === currentFilter;
-        });
-
-  renderHomeworks(filteredHomeworks);
-}
-
-function renderHomeworks(homeworks) {
-  if (!homeworkList) {
-    return;
-  }
-
-  if (!homeworks.length) {
-    homeworkList.innerHTML = `
-      <div class="empty-message">
-        ${escapeHtml(
-          t.noHomeworkList ||
-            t.noHomework ||
-            "Bu kurs için henüz ev ödevi eklenmedi.",
-        )}
-      </div>
-    `;
-    return;
-  }
-
-  homeworkList.innerHTML = homeworks
-    .map((homework) => {
-      const deadlineText = homework.deadline
-        ? `${t.deadlineLabel || "Teslim"}: ${homework.deadline}`
-        : t.noDeadline || "Teslim tarihi belirtilmedi";
-
-      return `
-        <article class="homework-item">
-          <div class="homework-icon" aria-hidden="true">✦</div>
-
-          <div class="homework-info">
-            <h3>${escapeHtml(homework.title || "")}</h3>
-
-            <p>
-              ${escapeHtml(homework.courseName || "")}
-              ·
-              ${escapeHtml(homework.description || "")}
-            </p>
-          </div>
-
-          <div class="homework-right">
-            <span class="deadline">
-              ${escapeHtml(deadlineText)}
-            </span>
-
-            <span class="homework-status">
-              ${escapeHtml(t.homeworkPending || "Bekliyor")}
-            </span>
-          </div>
-        </article>
-      `;
-    })
-    .join("");
-}
-
-/* --------------------------------------------------
-   DERS DETAY MODALI
--------------------------------------------------- */
-
-function openLessonModal(lesson) {
-  const modalContent = document.getElementById("modalContent");
-
-  if (!modal || !modalContent) {
-    return;
-  }
-
-  const practiceItems = Array.isArray(lesson.practice)
-    ? lesson.practice
-    : [];
-
-  modalContent.innerHTML = `
-    <div class="modal-header">
-      <span class="course-badge badge-${escapeHtml(lesson.course)}">
-        ${escapeHtml(lesson.courseName)}
-      </span>
-
-      <h2>${escapeHtml(lesson.title || "")}</h2>
-    </div>
-
-    <div class="modal-body">
-      <section class="modal-section">
-        <h3>${escapeHtml(t.modalExplanation || "📚 Konu Anlatımı")}</h3>
-
-        <p>
-          ${formatText(
-            lesson.explanation ||
-              t.noExplanation ||
-              "Bu dersin açıklaması henüz eklenmedi.",
-          )}
-        </p>
-      </section>
-
-      <section class="modal-section">
-        <h3>${escapeHtml(t.modalExample || "💻 Kod Örneği")}</h3>
-
-        <pre class="code-example"><code>${escapeHtml(
-          lesson.example ||
-            t.noExample ||
-            "// Kod örneği henüz eklenmedi.",
-        )}</code></pre>
-      </section>
-
-      <section class="modal-section">
-        <h3>${escapeHtml(t.modalPractice || "🎯 Pratik Görevler")}</h3>
-
-        ${
-          practiceItems.length
-            ? `
-              <ul>
-                ${practiceItems
-                  .map((item) => `<li>${escapeHtml(item)}</li>`)
-                  .join("")}
-              </ul>
-            `
-            : `
-              <p>
-                ${escapeHtml(
-                  t.noPractice ||
-                    "Bu ders için henüz pratik görev eklenmedi.",
-                )}
-              </p>
-            `
-        }
-      </section>
-
-      <section class="modal-section">
-        <h3>${escapeHtml(t.modalHomework || "🏠 Ev Ödevi")}</h3>
-
-        <div class="assignment-box">
-          <p>
-            ${formatText(
-              lesson.homework ||
-                t.noHomework ||
-                "Bu derse ait bir ev ödevi bulunmuyor.",
-            )}
-          </p>
-        </div>
-      </section>
-    </div>
-  `;
-
-  modal.classList.add("show");
-  document.body.style.overflow = "hidden";
-}
-
-/* --------------------------------------------------
-   İSTATİSTİKLER
--------------------------------------------------- */
-
-function updateTotalLessons(count) {
-  const totalLessonsStat = document.getElementById("totalLessonsStat");
-
-  if (totalLessonsStat) {
-    totalLessonsStat.textContent = count;
-  }
-}
-
-function updateHomeworkStat(count) {
-  const homeworkStat = document.getElementById("homeworkStat");
-
-  if (homeworkStat) {
-    homeworkStat.textContent = count;
-  }
-}
-
-/* --------------------------------------------------
-   YARDIMCI FONKSİYONLAR
--------------------------------------------------- */
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function formatText(value) {
-  return escapeHtml(value).replaceAll("\n", "<br>");
-}
-
-/* --------------------------------------------------
-   ÇIKIŞ
--------------------------------------------------- */
-
-if (logoutButton) {
-  logoutButton.addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-      window.location.href = "./login.html";
-    } catch (error) {
-      console.error("Çıkış hatası:", error);
-
-      alert(
-        t.alertLogoutError ||
-          "Çıkış yapılırken bir hata oluştu.",
-      );
-    }
-  });
-}
-
-/* --------------------------------------------------
-   MODAL KAPATMA
--------------------------------------------------- */
-
-function closeModal() {
-  if (!modal) {
-    return;
-  }
-
-  modal.classList.remove("show");
-  document.body.style.overflow = "";
-}
-
-if (modalCloseBtn) {
-  modalCloseBtn.addEventListener("click", closeModal);
-}
-
-if (modal) {
-  modal.addEventListener("click", (event) => {
-    if (event.target === modal) {
-      closeModal();
-    }
-  });
-}
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeModal();
-  }
-});
+  if
