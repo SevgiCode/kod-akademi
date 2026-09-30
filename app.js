@@ -385,7 +385,63 @@ function renderLessons(lessons) {
     });
   });
 }
+function renderFilteredHomeworks() {
+  const filteredHomeworks =
+    currentFilter === "all"
+      ? loadedHomeworks
+      : loadedHomeworks.filter((homework) => {
+          return homework.course === currentFilter;
+        });
 
+  renderHomeworks(filteredHomeworks);
+}
+
+function renderHomeworks(homeworks) {
+  if (!homeworkList) return;
+
+  if (!homeworks.length) {
+    homeworkList.innerHTML = `
+      <div class="empty-message">
+        ${t.noHomework}
+      </div>
+    `;
+    return;
+  }
+
+  homeworkList.innerHTML = homeworks
+    .map(
+      (homework) => `
+        <article class="homework-item">
+          <button
+            class="homework-check"
+            type="button"
+            aria-label="Ödevi tamamlandı olarak işaretle"
+          ></button>
+
+          <div class="homework-info">
+            <h3>${escapeHtml(homework.title || "")}</h3>
+
+            <p>
+              ${escapeHtml(homework.courseName || "")}
+              ·
+              ${escapeHtml(homework.description || "")}
+            </p>
+          </div>
+
+          <div class="homework-right">
+            <span class="deadline">
+              ${escapeHtml(homework.deadline || "")}
+            </span>
+
+            <span class="homework-status">
+              ${t.homeworkPending || "Bekliyor"}
+            </span>
+          </div>
+        </article>
+      `,
+    )
+    .join("");
+}
 function openLessonModal(lesson) {
   const modal = document.getElementById("lessonModal");
   const modalContent = document.getElementById("modalContent");
