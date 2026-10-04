@@ -13,6 +13,10 @@ import {
   getDocs,
   query,
   orderBy,
+  where,
+  addDoc,
+  deleteDoc,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const allCourses = ["html-mk", "html-tr", "javascript", "react"];
