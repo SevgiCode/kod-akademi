@@ -8,7 +8,14 @@ export const translations = {
     loading: "Се вчитува...",
     student: "Ученик",
     teacher: "Професор - Сите курсеви",
-
+completeLesson: "Ја завршив лекцијата",
+lessonCompleted: "Завршено",
+completeLessonError: "Се појави грешка при ажурирање на статусот на лекцијата.",
+loadingHomework: "Се вчитуваат домашните задачи...",
+noHomeworkList: "Сè уште нема објавени домашни задачи за овој курс.",
+deadlineLabel: "Рок",
+noDeadline: "Нема наведен рок",
+homeworkPending: "Во тек",
     // Navigasyon
     menuLabel: "МЕНИ",
     home: "Почетна",
@@ -92,7 +99,14 @@ export const translations = {
     loading: "Yükleniyor...",
     student: "Öğrenci",
     teacher: "Eğitmen - Tüm Kurslar",
-
+completeLesson: "Dersi tamamladım",
+lessonCompleted: "Tamamlandı",
+completeLessonError: "Ders durumu güncellenirken hata oluştu.",
+loadingHomework: "Ev ödevleri yükleniyor...",
+noHomeworkList: "Bu kurs için henüz yayınlanmış ev ödevi yok.",
+deadlineLabel: "Teslim",
+noDeadline: "Teslim tarihi belirtilmedi",
+homeworkPending: "Bekliyor",
     // Navigasyon
     menuLabel: "MENÜ",
     home: "Ana Sayfa",
