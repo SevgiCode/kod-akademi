@@ -1199,3 +1199,35 @@ body.dark-mode {
   border-color: #df4e5c;
   background: #df4e5c;
 }
+.lesson-completed {
+    color: #159461;
+    font-weight: 700;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 28px;
+}
+
+.modal-complete-btn {
+    padding: 12px 17px;
+    border: 0;
+    border-radius: 10px;
+    background: #6d4aff;
+    color: #ffffff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    transition: 0.2s ease;
+}
+
+.modal-complete-btn:hover {
+    background: #5534e4;
+    transform: translateY(-1px);
+}
+
+.modal-complete-btn.done {
+    background: #19b979;
+}
