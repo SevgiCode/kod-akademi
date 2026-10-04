@@ -22,7 +22,11 @@ import {
 const allCourses = ["html-mk", "html-tr", "javascript", "react"];
 
 let currentUserData = null;
+let currentFirebaseUser = null;
+
 let loadedLessons = [];
+let completedProgress = [];
+
 let currentFilter = "all";
 let t = translations.mk; // varsayılan dil: Makedonca
 let currentLang = "mk";
