@@ -141,6 +141,7 @@ function applyLanguage() {
 
 // --- FIREBASE AUTH ---
 onAuthStateChanged(auth, async (user) => {
+  currentFirebaseUser = user;
   if (!user) {
     window.location.href = "./login.html";
     return;
